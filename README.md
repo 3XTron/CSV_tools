@@ -5,15 +5,22 @@ The application is designed for robustness and a smooth user experience, featuri
 
 ✨ Key Features
 Large File Support: Processes multi-gigabyte CSV files efficiently using a chunk-based approach with the Pandas library.
+
 Responsive UI: The main interface remains fully responsive during intensive file processing thanks to multi-threading.
-Adjustable Parameters:
-Specify the Top N values to find for each column.
+
+Adjustable Parameters:Specify the Top N values to find for each column.
 Manually set the Chunk Size (rows per batch) to balance performance and memory usage.
+
 Accurate Progress Tracking: Dynamically estimates the total number of chunks by analyzing a file sample, providing a realistic progress bar.
+
 Graceful Controls: Safely stop an ongoing analysis or close the application without losing data or causing errors.
+
 Automatic Encoding Detection: Uses chardet to automatically determine the correct file encoding.
+
 Export Results: Save the final analysis report and the detailed process log to separate text/log files.
+
 Adjustable UI Scale (Zoom): Increase or decrease the size of all interface elements for better readability on any display.
+
 Automatic Dependency Management: Checks for required libraries (pandas, chardet) on startup and offers to install them automatically.
 
 🚀 Installation & Usage
@@ -139,29 +146,41 @@ Data manipulation or transformation (exception: handling of missing/null values 
 Support for non-CSV file formats.
 Export functionalities to formats other than text (.txt, .log).
 Multi-user or networking functionalities.
+
 #3. Architecture and Components
 The application follows a classic GUI application architecture model, with a clear separation between the main graphical interface thread and a secondary thread for intensive processing operations.
 
 Main Components:
 
 GUI (Tkinter): Manages the user interface, events (click, input), and information display. It includes ttk widgets for a modern look. GUI scaling is achieved by programmatically adjusting the font sizes of all relevant widgets using tkfont and ttk.Style, not a global Tcl command.
+
 Core Processing Logic (Pandas): Uses the pandas library for efficient reading of CSV files in chunks (chunksize) and for counting the frequency of values.
+
 Dynamic Progress Estimation: Before processing, the application reads a small sample of the file (FILE_SAMPLE_SIZE) to calculate an average row size. This dynamic value is used to provide a significantly more accurate estimation of the total_chunks to be processed, which is displayed in the status bar.
+
 Encoding Detection (Chardet): Uses the chardet library on the initial file sample to detect the encoding with high probability.
+
 Threading Module: Allows the file processing operation to run in a separate thread (threading.Thread) to prevent the GUI from freezing. A threading.Event (stop_event) is used for the graceful stop mechanism.
+
 Graceful Shutdown (root.protocol): The WM_DELETE_WINDOW protocol is handled by the on_closing method to check for active processing and prompt the user before exiting.
-Logging Module: Manages system messages (INFO, WARNING, ERROR) using the standard logging module. It includes a custom handler (GUILogHandler) to redirect messages to the log widget in the GUI in a thread-safe manner (using widget.after()).
+
+Logging Module: Manages system messages (INFO, WARNING, ERROR) using the standard logging module. It includes a custom handler (GUILogHandler) to redirect messages to the log widget in the GUI in a thread-safe manner (using widget.after()). 
+
 Dependency Management (Subprocess, Importlib): Uses standard Python modules to check for the existence of the required libraries and attempts to install them via pip.
+
 # 4. Detailed Functional Requirements
+
 4.1. CSV File Selection:
 
 A "Browse..." button opens a standard file selection dialog, filtering for .csv files.
 The selected file path is displayed in a readonly Entry field.
 The path is stored internally for processing.
+
 4.2. Parameter Specification:
 
 Top N: An Entry field allows the user to specify the number of top values to report. Defaults to 10. Input is validated to be a positive integer.
 Chunk Size: An Entry field allows the user to specify the number of rows per chunk. Defaults to 9000. Input is validated to be an integer greater than or equal to 500 (MIN_CHUNK_SIZE).
+
 4.3. CSV File Processing (Multi-threaded):
 
 The "Process CSV" button initiates processing.
@@ -179,32 +198,36 @@ Regularly updates the status bar with the current chunk number.
 Checks for the stop_event between each chunk.
 After the loop, generates the final report.
 Handles exceptions and logs them appropriately.
+
 4.4. Interruption and Shutdown Mechanism:
 
 Stop Button: Pressing "Stop Processing" sets the stop_event. The processing thread will terminate gracefully after finishing its current chunk.
 Window Close [x]: The on_closing method is triggered. If processing is active, it shows a messagebox.askyesno to confirm. If confirmed, it calls stop_processing() and then root.destroy().
+
 4.5. Displaying the Analysis Report:
 
 A ScrolledText widget displays the final Top N analysis.
 The widget is readonly and updated safely from the processing thread using self.root.after().
+
 4.6. Displaying the Process Log:
 
 A separate ScrolledText widget displays all log messages via the GUILogHandler.
 The widget is readonly and auto-scrolls to the latest message.
 Log entries include timestamps, levels, and messages (e.g., file selection, encoding, progress, save paths, errors).
+
 4.7. Save Functionalities:
 
-Save Report:
-Enabled only if processing completed successfully and the report does not contain only an error or interruption message.
+Save Report:Enabled only if processing completed successfully and the report does not contain only an error or interruption message.
 Suggests a filename like Report_[CSV-Name]_TopN_[Timestamp].txt.
 Saves using the detected file encoding, with a fallback to UTF-8.
 Logs the save path upon success.
-Save Log:
-Enabled after any processing attempt (successful or not).
+
+Save Log:Enabled after any processing attempt (successful or not).
 Suggests a filename like Log_[CSV-Name]_[Timestamp].log.
 Always saves using UTF-8 encoding.
 Logs the save path upon success.
 Both functions use a sanitize_filename method to remove invalid characters from suggested names.
+
 4.8. GUI Scaling (Zoom):
 
 "+" and "-" buttons control the UI scale.
@@ -214,31 +237,39 @@ It updates the size for default fonts (TkDefaultFont, etc.) via tkfont.nametofon
 It updates the font size for ttk widgets via ttk.Style().configure.
 This approach ensures all text-based elements are resized consistently.
 Zoom buttons are disabled at min/max scaling limits.
+
 4.9. Dependency Management:
 
 At startup, a function checks for pandas and chardet.
 If missing, a messagebox prompts the user for installation via pip.
 The installation is performed in a subprocess.
 The application exits if installation fails or is refused by the user.
+
 # 5. Non-Functional Requirements
+
 User Interface (UI):
 A logical layout with controls at the top, a central pannable area, and a status bar at the bottom.
 The main window starts with a default size of 1900x900 pixels and a default GUI scale of 1.2.
 The central area uses a vertical PanedWindow to separate the top controls from the main analysis area, which in turn uses a horizontal PanedWindow for the "Report" and "Log" panes.
-Performance:
-Handles multi-gigabyte files without exhausting memory due to chunking.
-GUI remains fully responsive during processing.
-Robustness:
-Does not crash on malformed CSV rows (errors are logged).
-Gracefully handles process interruption and application shutdown.
-Maintainability:
-Well-structured, commented Python code. Use of constants for key parameters.
-Portability:
-Runs on any OS with a standard Python 3 interpreter.
+
+Performance:Handles multi-gigabyte files without exhausting memory due to chunking. GUI remains fully responsive during processing.
+
+Robustness:Does not crash on malformed CSV rows (errors are logged). Gracefully handles process interruption and application shutdown.
+
+Maintainability: Well-structured, commented Python code. Use of constants for key parameters.
+
+Portability:Runs on any OS with a standard Python 3 interpreter.
+
 # 6. Specific Technical Constraints
+
 Programming Language: Python 3.6+.
+
 Mandatory Libraries: tkinter, threading, collections, os, logging, sys, io, datetime, subprocess, importlib, re, math, chardet, pandas.
+
 GUI Framework: Tkinter with ttk widgets.
+
 Concurrency Model: Multi-threading (one GUI thread, one worker thread).
+
 GUI Scaling Implementation: Must be implemented by manipulating font sizes via tkfont and ttk.Style, as this provides reliable cross-platform scaling.
+
 Dynamic Chunk Estimation Logic: The estimation of total chunks must be performed dynamically by analyzing an initial file sample to calculate an average row size, avoiding "magic numbers".
