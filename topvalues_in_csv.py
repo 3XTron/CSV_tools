@@ -134,7 +134,7 @@ class CSVAnalyzerApp:
         self.zoom_out_button.pack(side="left", padx=(5, 0))
         params_frame = ttk.Frame(top_controls_frame)
         params_frame.pack(side="right", anchor="e")
-        ttk.Label(params_frame, text="Top N:").pack(side="left", padx=(10, 2))
+        ttk.Label(params_frame, text="Top number of values:").pack(side="left", padx=(10, 2))
         ttk.Entry(params_frame, textvariable=self.top_n_var, width=8).pack(side="left")
         ttk.Label(params_frame, text="Chunk Size:").pack(side="left", padx=(10, 2))
         ttk.Entry(params_frame, textvariable=self.chunk_size_var, width=10).pack(side="left")
